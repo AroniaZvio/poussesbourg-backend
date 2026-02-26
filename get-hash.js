@@ -1,0 +1,1 @@
+const bcrypt = require('bcryptjs'); bcrypt.hash('expat2026', 10).then(h => console.log('Хэш:', h));

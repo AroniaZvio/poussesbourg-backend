@@ -1,0 +1,44 @@
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
+const pool = require('./src/db');
+const authMiddleware = require('./src/middleware/auth');
+
+const authRouter = require('./src/routes/auth');
+const productsRouter = require('./src/routes/products');
+const categoriesRouter = require('./src/routes/categories');
+const ordersRouter = require('./src/routes/orders');
+const adminRouter = require('./src/routes/admin');
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(cors());
+app.use(express.json());
+
+// Публичные маршруты
+app.use('/api/auth', authRouter);
+app.use('/api/products', productsRouter);
+app.use('/api/categories', categoriesRouter);
+app.use('/api/orders', ordersRouter);
+app.use('/api/admin', adminRouter);
+
+app.get('/', (req, res) => {
+  res.json({
+    message: '🌱 Poussesbourg API работает!',
+    version: '1.0.0',
+    endpoints: [
+      'GET  /api/products',
+  'GET  /api/products/:id',
+  'GET  /api/categories',
+  'POST /api/orders',
+  'GET  /api/orders/:id',
+  'GET  /api/orders/customer/:email',
+    ]
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`✅ Сервер запущен на http://localhost:${PORT}`);
+});
