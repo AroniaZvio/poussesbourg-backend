@@ -10,6 +10,8 @@ const productsRouter = require('./src/routes/products');
 const categoriesRouter = require('./src/routes/categories');
 const ordersRouter = require('./src/routes/orders');
 const adminRouter = require('./src/routes/admin');
+const newsletterRouter = require('./src/routes/newsletter');
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,6 +28,7 @@ app.use('/api/products', productsRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/newsletter', newsletterRouter);
 
 app.get('/', (req, res) => {
   res.json({
