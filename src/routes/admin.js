@@ -76,15 +76,16 @@ router.put('/products/:id', async (req, res) => {
 
     if (!name_fr) return res.status(400).json({ success: false, error: 'name_fr обязателен' });
 
-    // Обновляем продукт
+    // Обновляем продукт (в БД колонка status, не is_active)
+    const status = is_active !== false ? 'active' : 'inactive';
     const result = await pool.query(
       `UPDATE products SET
         name_fr = $1, name_ru = $2,
         description_fr = $3, description_ru = $4,
         category_id = $5, image_url = $6,
-        grow_days = $7, is_active = $8
+        grow_days = $7, status = $8
        WHERE id = $9 RETURNING *`,
-      [name_fr, name_ru, description_fr, description_ru, category_id, image_url, grow_days, is_active !== false, id]
+      [name_fr, name_ru, description_fr, description_ru, category_id, image_url, grow_days, status, id]
     );
 
     if (!result.rows.length) return res.status(404).json({ success: false, error: 'Продукт не найден' });
