@@ -68,6 +68,49 @@ router.patch('/products/:id', async (req, res) => {
   }
 });
 
+// PUT /api/admin/products/:id — полное обновление продукта + цены
+router.put('/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name_fr, name_ru, description_fr, description_ru, category_id, image_url, grow_days, is_active, prices } = req.body;
+
+    if (!name_fr) return res.status(400).json({ success: false, error: 'name_fr обязателен' });
+
+    // Обновляем продукт
+    const result = await pool.query(
+      `UPDATE products SET
+        name_fr = $1, name_ru = $2,
+        description_fr = $3, description_ru = $4,
+        category_id = $5, image_url = $6,
+        grow_days = $7, is_active = $8
+       WHERE id = $9 RETURNING *`,
+      [name_fr, name_ru, description_fr, description_ru, category_id, image_url, grow_days, is_active !== false, id]
+    );
+
+    if (!result.rows.length) return res.status(404).json({ success: false, error: 'Продукт не найден' });
+
+    // Обновляем цены если переданы
+    if (prices && Array.isArray(prices)) {
+      // Удаляем старые b2c цены
+      await pool.query(`DELETE FROM prices WHERE product_id = $1 AND price_type = 'b2c'`, [id]);
+      // Вставляем новые
+      for (const p of prices) {
+        if (p && p.price_eur) {
+          await pool.query(
+            `INSERT INTO prices (product_id, weight_g, price_eur, price_type, active)
+             VALUES ($1, $2, $3, $4, true)`,
+            [id, p.weight_g, p.price_eur, p.price_type || 'b2c']
+          );
+        }
+      }
+    }
+
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // DELETE /api/admin/products/:id — удалить продукт
 router.delete('/products/:id', async (req, res) => {
   try {
