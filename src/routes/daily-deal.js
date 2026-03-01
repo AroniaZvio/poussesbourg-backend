@@ -36,13 +36,15 @@ router.get('/', async (req, res) => {
 router.put('/:id', upload.single('image'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { product_name, description, discount_percent } = req.body;
+    const { product_name, description, discount_percent, image_url: bodyImageUrl } = req.body;
 
     // Если загружено новое фото
     let imageUrl = null;
     if (req.file) {
       const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
       imageUrl = `${baseUrl}/uploads/daily-deal/${req.file.filename}`;
+    } else if (bodyImageUrl) {
+      imageUrl = bodyImageUrl;
     }
 
     const updates = [];
